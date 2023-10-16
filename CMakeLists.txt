@@ -25,8 +25,6 @@ IF((NOT DEFINED CMAKE_INSTALL_PREFIX) OR CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEF
   SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/dist" CACHE PATH "Default install path" FORCE)
 ENDIF()
 
-
-       
 install(TARGETS httpServer   
     RUNTIME       DESTINATION "bin"
     LIBRARY       DESTINATION "lib" 
@@ -39,13 +37,23 @@ install(TARGETS httpServer
 #*******************************************************************************
 option(asan "Adress sanitizer" OFF)
 if(asan)
-message(INFO " Adress sanitizer")
+message(INFO " Adress sanitizer is on")
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -fsanitize=leak")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -fsanitize=leak")
    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ")
 endif()
 
-
+#*******************************************************************************
+#                        TSAN
+#*******************************************************************************
+# tsan
+option(tsan "Thread sanitizer" OFF)
+if(tsan)
+message(INFO " Thread sanitizer is on")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=thread")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=thread")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ")
+endif()
 
 #*******************************************************************************
 #                        GTESTs
