@@ -312,7 +312,7 @@ void sendHttpResponse(struct HttpResponse* This, int p_socket) {
     }
 
     if (This->contentLength >= 0) {
-        snprintf(contentLengthStr, sizeof(contentLengthStr), "%d", This->code, This->contentLength);
+        snprintf(contentLengthStr, sizeof(contentLengthStr), "%d", This->contentLength);
         strncat(buff, "Content-Length: ", MAX_TCP_PACKAGE_SIZE-1);
         strncat(buff, contentLengthStr, MAX_TCP_PACKAGE_SIZE-1);
         strncat(buff, "\x0D\x0A", MAX_TCP_PACKAGE_SIZE-1);
@@ -334,11 +334,22 @@ void sendHttpResponse(struct HttpResponse* This, int p_socket) {
     send(p_socket, buff, strlen(buff), 0);
 }
 
-struct HttpResponse createSimpleHttpResponse(const char* msg, int code) {
+struct HttpResponse createSimpleHttpResponse(const char* p_msg, int p_code) {
     struct HttpResponse response;
     clearHttpResponse(&response);
-    response.msg = strdup(msg);
-    response.code = code;
+    response.msg = strdup(p_msg);
+    response.code = p_code;
+    return response;
+}
+
+struct HttpResponse createHttpResponse(const char* p_msg, int p_code, const char* p_content, const char* p_contentType, int p_contentLength) {
+    struct HttpResponse response;
+    clearHttpResponse(&response);
+    response.msg = strdup(p_msg);
+    response.content = strdup(p_content);
+    response.contentType = strdup(p_contentType);
+    response.code = p_code;
+    response.contentLength = p_contentLength;
     return response;
 }
 

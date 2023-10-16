@@ -1,4 +1,5 @@
 # Compiled Object files
+**/result.txt
 **/.DS_Store
 *.slo
 *.lo

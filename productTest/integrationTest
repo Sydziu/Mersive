@@ -1,0 +1,60 @@
+echo -----------------------------------
+echo get unexisting key 
+curl -i http://localhost:8000/foo
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo add key1
+curl -i -H "Content-Type: application/json" -X POST -d '{ "secret": 42 }' http://localhost:8000/foo
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo add key2
+curl -i -H "Content-Type: application/json" -X POST -d '{ "secret": 42 }' http://localhost:8000/foo/1
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo get key1
+curl -i http://localhost:8000/foo
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo get key2
+curl -i http://localhost:8000/foo/1
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo get delete key
+curl -i -X DELETE http://localhost:8000/foo
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo delete unexisting key
+curl -i -X DELETE http://localhost:8000/foo
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo get key1
+curl -i http://localhost:8000/foo
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo get key2
+curl -i http://localhost:8000/foo/1
+echo
+echo -----------------------------------
+
+echo -----------------------------------
+echo delete unexisting key
+curl -i -X DELETE http://localhost:8000/foo/1
+echo
+echo -----------------------------------
+

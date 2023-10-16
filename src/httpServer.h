@@ -50,4 +50,5 @@ struct HttpServer {
 
 
 struct HttpServer createHttpServer();
-struct HttpResponse createSimpleHttpResponse(const char* msg, int code);
+struct HttpResponse createSimpleHttpResponse(const char* p_msg, int p_code);
+struct HttpResponse createHttpResponse(const char* p_msg, int p_code, const char* p_content, const char* p_contentType, int p_contentLength);

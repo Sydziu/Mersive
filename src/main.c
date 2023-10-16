@@ -42,7 +42,7 @@ static struct HttpResponse onHttpRequest(struct HttpRequest* p_request) {
     	    return response;
     	}
     	destroySingleRecord(&record);
-    	struct HttpResponse response = createSimpleHttpResponse("OK", 202);
+    	struct HttpResponse response = createSimpleHttpResponse("OK", 200);
     	return response;
     }
     if (p_request->method == REQ_DELETE) {
@@ -52,14 +52,21 @@ static struct HttpResponse onHttpRequest(struct HttpRequest* p_request) {
     	    struct HttpResponse response = createSimpleHttpResponse("Not Found", 404);
     	    return response;
     	}
-    	struct HttpResponse response = createSimpleHttpResponse("OK", 202);
+    	struct HttpResponse response = createSimpleHttpResponse("OK", 200);
     	return response;
     }
     if (p_request->method == REQ_GET) {
-        printf("GET method\n");
+    	struct SingleRecord* record = keyStg.getKey(&keyStg, p_request->url);
+    	if (record) {
+        	struct HttpResponse response = createHttpResponse("OK", 200, record->content, record->contentType, record->contentLength);
+        	return response;
+    	}
+	    struct HttpResponse response = createSimpleHttpResponse("Not Found", 404);
+	    return response;
     }
     if (p_request->method == REQ_UNKNOWN) {
-        printf("UNKNOWN method\n");
+	    struct HttpResponse response = createSimpleHttpResponse("Not Found", 404);
+	    return response;
     }
 
     printf("This app level  callback for http server.\n");
