@@ -9,6 +9,14 @@
 #include <stdio.h>
 #include <pthread.h>
 
+struct HttpResponse{
+    char* msg;
+    char* contentType;
+    char* content;
+    int contentLength;
+    int code;
+};
+
 enum HTTP_REQUEST_METHOD {REQ_UNKNOWN, REQ_GET, REQ_POST, REQ_DELETE};
 struct HttpRequest {
     enum HTTP_REQUEST_METHOD method;
@@ -28,7 +36,7 @@ struct HttpServer {
     /* Make sure that you register this before you call the start()    */
     /* otherwise you got into trouble because of thread hazard issue   */
     /*******************************************************************/
-    void (*onHttpRequest)(struct HttpRequest* p_request);
+    struct HttpResponse  (*onHttpRequest)(struct HttpRequest* p_request);
     struct {
         pthread_mutex_t lock;
         volatile int finishMe;
@@ -41,4 +49,4 @@ struct HttpServer {
 
 
 struct HttpServer createHttpServer();
-
+struct HttpResponse createSimpleHttpResponse(const char* msg, int code);

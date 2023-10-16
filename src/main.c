@@ -24,7 +24,8 @@
 // Using poll() instead of select()
 // https://www.ibm.com/docs/en/i/7.1?topic=designs-using-poll-instead-select
 
-static void onHttpRequest(struct HttpRequest* p_request) {
+
+static struct HttpResponse onHttpRequest(struct HttpRequest* p_request) {
     if (p_request->method == REQ_POST) {
         printf("Post method\n");
     }
@@ -39,6 +40,8 @@ static void onHttpRequest(struct HttpRequest* p_request) {
     }
 
     printf("This app level  callback for http server.\n");
+    struct HttpResponse response = createSimpleHttpResponse("Not Found", 404);
+    return response;
 }
 
 int main() {

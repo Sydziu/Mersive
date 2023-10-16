@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-
+#include <assert.h>
 
 #include "httpServer.h"
 #include "stringUtils.h"
@@ -278,24 +278,87 @@ static int createSocket(const char p_ip[], int p_port) {
     return listen_sd;
 }
 
-static const char* HTTP_404_ERROR = "HTTP/1.1 404 Not Found" "\x0D\x0A\x0D\x0A";
+void clearHttpResponse(struct HttpResponse* This) {
+    This->contentLength=-1;
+    This->contentType=NULL;
+    This->content=NULL;
+    This->msg=NULL;
+    This->code=0;
+}
+
+static void destroyHttpResponse(struct HttpResponse* This) {
+    This->contentLength=-1;
+    free(This->contentType);
+    free(This->msg);
+    free(This->content);
+}
+
+void sendHttpResponse(struct HttpResponse* This, int p_socket) {
+    char buff[MAX_TCP_PACKAGE_SIZE]={0};
+    char contentLengthStr[32]={0};
+
+    assert(This->msg);  // expect that the message will be provided
+
+    snprintf(buff, MAX_TCP_PACKAGE_SIZE, "HTTP/1.1 %d %s\x0D\x0A", This->code, This->msg);
+    if (This->contentType != NULL) {
+        strncat(buff, "Content-Type: ", MAX_TCP_PACKAGE_SIZE-1);
+        strncat(buff, This->contentType, MAX_TCP_PACKAGE_SIZE-1);
+        strncat(buff, "\x0D\x0A", MAX_TCP_PACKAGE_SIZE-1);
+    }
+
+    if (This->contentLength >= 0) {
+        snprintf(contentLengthStr, sizeof(contentLengthStr), "%d", This->code, This->contentLength);
+        strncat(buff, "Content-Length: ", MAX_TCP_PACKAGE_SIZE-1);
+        strncat(buff, contentLengthStr, MAX_TCP_PACKAGE_SIZE-1);
+        strncat(buff, "\x0D\x0A", MAX_TCP_PACKAGE_SIZE-1);
+    }
+
+    /*************************************************************/
+    /* Mark end of header ODOA                                   */
+    /*************************************************************/
+    strncat(buff, "\x0D\x0A", MAX_TCP_PACKAGE_SIZE-1);
+
+    /*************************************************************/
+    /* Add content if exist.                                     */
+    /* Assume that there is no NULL character inside             */
+    /*************************************************************/
+    if (This->content != NULL) {
+        strncat(buff, This->content , MAX_TCP_PACKAGE_SIZE);
+    }
+
+    send(p_socket, buff, strlen(buff), 0);
+}
+
+struct HttpResponse createSimpleHttpResponse(const char* msg, int code) {
+    struct HttpResponse response;
+    clearHttpResponse(&response);
+    response.msg = strdup(msg);
+    response.code = code;
+    return response;
+}
+
+// static const char* HTTP_404_ERROR = "HTTP/1.1 404 Not Found" "\x0D\x0A\x0D\x0A";
 
 static void httpRequestDispacer(struct HttpServer* This, char* p_httpRequestToParse, size_t p_size, int p_new_sd) {
 
-    struct HttpRequest req = createHttpRequest(p_httpRequestToParse, p_size);
+    struct HttpRequest reqest = createHttpRequest(p_httpRequestToParse, p_size);
+
+    struct HttpResponse response = This->onHttpRequest(&reqest);
 
 
-    This->onHttpRequest(&req);
-    send(p_new_sd, HTTP_404_ERROR, strlen(HTTP_404_ERROR), 0);
+    sendHttpResponse(&response, p_new_sd);
 
-    destroyHttpRequest(&req);
+    destroyHttpResponse(&response);
+    destroyHttpRequest(&reqest);
 }
 
 /***********************************************************/
 /* Default callback                                        */
 /***********************************************************/
-static void onHttpRequest(struct HttpRequest* p_request) {
+struct HttpResponse  onHttpRequest(struct HttpRequest* p_request) {
     printf("This is default callback for http server. You have to implement you callback.\n");
+    struct HttpResponse response = createSimpleHttpResponse("Please Implement onHttpRequest method", 404);
+    return response;
 }
 
 static void newConnectionHasCome(struct HttpServer* This, int new_sd) {
