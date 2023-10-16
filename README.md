@@ -46,3 +46,25 @@ Once you start the binary (httpServer) you can enter several commands:
 1. exit - this command will close the software
 2. report - this command will report information about currently stored keys
 
+# Static Code Analysis
+Use following commands to analyze the code statically:
+
+```
+cd Mersive
+mkdir build
+cd build
+cmake  -Dsta=on -Dwall=on ../
+make install
+```
+
+# Doxygen - TODO
+
+# Code coverage - TODO
+
+# lib Fuzzer - TODO
+LibFuzzer is an in-process, coverage-guided, evolutionary fuzzing engine.
+
+LibFuzzer is linked with the library under test, and feeds fuzzed inputs to the library via a specific fuzzing entrypoint (aka “target function”); 
+the fuzzer then tracks which areas of the code are reached, and generates mutations on the corpus of input data in order to maximize the code coverage.
+
+1. Add test for libfuzzer: https://llvm.org/docs/LibFuzzer.html

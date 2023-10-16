@@ -82,11 +82,11 @@ int main() {
 
     server.onHttpRequest = &onHttpRequest;
 
-    server.start(&server, "0.0.0.0", 8000);
+    server.start(&server, 8000);
     int finishMe = 0;
     while (finishMe == 0) {
         printf("[PS]> ");  // print prompt
-        int lineSize = getline(&line, &len, stdin);
+        getline(&line, &len, stdin);
         chomp(line);
         //*********************************
         //      exit command

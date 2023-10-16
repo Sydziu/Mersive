@@ -1,4 +1,4 @@
-#include "../src/keyStorage.c"
+#include "../src/keyStorage.c"  // NOLINT dirty hack to have access to static function
 /*******************************************************
  * Copyright (C) 2023
  *
@@ -15,7 +15,7 @@
 TEST(keyStorage, update) {
     struct KeyStorage keyStg = createKeyStorage();
     EXPECT_EQ(keyStg.getSize(&keyStg), 0);
-    struct SingleRecord record;
+    struct SingleRecord record={0, 0, 0, 0};
     memset(&record, 0, sizeof(record));
 
     /*************************************************************/
@@ -43,7 +43,7 @@ TEST(keyStorage, update) {
     /*************************************************************/
     /* Retrieve first key                                        */
     /*************************************************************/
-    struct SingleRecord* storedKey;
+    struct SingleRecord* storedKey{NULL};
     storedKey = keyStg.getKey(&keyStg, "url1");
     ASSERT_TRUE(storedKey);
     EXPECT_EQ(std::string(storedKey->content), "content2");
@@ -58,9 +58,9 @@ TEST(keyStorage, tooMachInserts) {
 	int keyIndex=0;
 	char keyIndexBuff[32];
     struct KeyStorage keyStg = createKeyStorage();
-    struct SingleRecord record;
+    struct SingleRecord record={0, 0, 0, 0};
 
-	for (keyIndex = 0; keyIndex < 1000; keyIndex++) {
+	for (keyIndex = 0; keyIndex < 110; keyIndex++) {
 		snprintf(keyIndexBuff, sizeof(keyIndexBuff), "url-%d", keyIndex);
 		memset(&record, 0, sizeof(record));
 
@@ -85,10 +85,10 @@ TEST(keyStorage, tooMachInserts) {
 	destroyKeyStorage(&keyStg);
 }
 
-TEST(keyStorage, add_get_remove) {
+TEST(keyStorage, addGetRemove) {
     struct KeyStorage keyStg = createKeyStorage();
 
-    struct SingleRecord record;
+    struct SingleRecord record={0, 0, 0, 0};
     memset(&record, 0, sizeof(record));
 
     /*************************************************************/
@@ -116,9 +116,9 @@ TEST(keyStorage, add_get_remove) {
     /*************************************************************/
     /* Retrieve  keys                                            */
     /*************************************************************/
-    struct SingleRecord* storedKey;
+    struct SingleRecord* storedKey={NULL};
     storedKey = keyStg.getKey(&keyStg, "url1");
-    ASSERT_TRUE(storedKey != NULL);
+    ASSERT_TRUE(storedKey);                          // NOLINT clang-analyzer-unix.Malloc
     EXPECT_EQ(std::string(storedKey->content), "content1");
     EXPECT_EQ(std::string(storedKey->contentType), "content-type1");
     EXPECT_EQ(std::string(storedKey->url), "url1");

@@ -8,7 +8,7 @@
 #pragma once
 #include <stdio.h>
 #include <pthread.h>
-static pthread_mutex_t lock;
+
 
 struct HttpResponse{
     char* msg;
@@ -30,7 +30,7 @@ struct HttpRequest {
 
 
 struct HttpServer {
-    void (*start)(struct HttpServer *This, const char p_ip[], int p_port);
+    void (*start)(struct HttpServer *This, int p_port);
     void (*stop)(struct HttpServer *This);
     /*******************************************************************/
     /* Register call back by setting the onHttpRequest pointer         */

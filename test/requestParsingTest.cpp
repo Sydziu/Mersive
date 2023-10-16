@@ -1,5 +1,5 @@
-#include "../src/httpServer.c"
-#include "../src/stringUtils.c"
+#include "../src/httpServer.c"   // NOLINT dirty hack to test static fields
+#include "../src/stringUtils.c"  // NOLINT dirty hack to test static fields
 /*******************************************************
  * Copyright (C) 2020 Ftd Aero
  *

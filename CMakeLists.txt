@@ -31,7 +31,42 @@ install(TARGETS httpServer
     ARCHIVE       DESTINATION "lib"
     PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ  GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE
     )
-    
+
+#*******************************************************************************
+#                        Static Analyzer 
+#*******************************************************************************
+option(sta "Static Analyzer" OFF)
+if(sta)
+    message(INFO " Static Analyzer is on")
+    find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy)
+    list( APPEND CMAKE_CXX_CLANG_TIDY "-checks=*,-cppcoreguidelines-no-malloc,-hicpp-no-malloc, -altera-unroll-loops, -hicpp-signed-bitwise,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-llvm*,-fuchsia*,-android*,-boost*,-mpi*,-objc*,-zircon*,-abseil*,-clang-analyzer-osx*,-clang-analyzer-optin.osx*,-clang-analyzer-optin.mpi*,-cert-*,-clang-diagnostic-unused-function,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-hicpp-no-array-decay,-modernize-avoid-c-arrays,-hicpp-avoid-c-arrays,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-use-nullptr,-modernize-use-nullptr,-cppcoreguidelines-pro-type-cstyle-cast,-cppcoreguidelines-owning-memory,-modernize-use-trailing-return-type") 
+    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+    list( APPEND CMAKE_CXX_CPPCHECK "")
+endif()
+
+#*******************************************************************************
+#                        Code Coverage 
+#*******************************************************************************
+option(cov "Code coverage" OFF)
+if(cov)
+message(INFO " Code coverage is on")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -coverage -g")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage -g")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
+endif()
+
+#*******************************************************************************
+#                        WALL
+#*******************************************************************************
+option(wall "Warning all" OFF)
+if(wall)
+message(INFO " Warning all is on")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ")
+endif()
+
+
 #*******************************************************************************
 #                        ASAN
 #*******************************************************************************

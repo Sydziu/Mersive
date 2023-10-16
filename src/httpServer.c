@@ -17,8 +17,11 @@
 
 #include "httpServer.h"
 #include "stringUtils.h"
-#define  MAX_TCP_PACKAGE_SIZE  1024
 
+static pthread_mutex_t lock;
+
+#define  MAX_TCP_PACKAGE_SIZE  1024
+//asasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 static void parsePropertyLine(struct HttpRequest* This, char* line) {
     char* key = line;
     char* value = line;
@@ -93,7 +96,7 @@ static void parseFirstLine(struct HttpRequest* This, char* line) {
 
 
     This->url = strdup(urlStr);
-    if ((This->url == 0) && (This->url[0] == 0)) {
+    if ((This->url != NULL) && (This->url[0] == 0)) {
         // no url address
         return;
     }
@@ -159,7 +162,7 @@ static struct HttpRequest createHttpRequest(char *p_buff, size_t p_size) {
     /* Get content if POST method. Make sure that size match     */
     /*************************************************************/
     if (This.method == REQ_POST) {
-        int realSize = (int)(&p_buff[p_size] - begin);
+    	size_t realSize = (size_t)(&p_buff[p_size] - begin);
         if (realSize != This.contentLength) {
             This.method = REQ_UNKNOWN;  // size does not match
         } else {
@@ -209,12 +212,9 @@ static void  setServerEnd(struct HttpServer *This) {
 #define TRUE             1
 #define FALSE            0
 
-static int createSocket(const char p_ip[], int p_port) {
-    int    len, rc, on = 1;
+static int createSocket(int p_port) {
+    int    rc, on = 1;
     int    listen_sd = -1;
-    int    desc_ready, end_server = FALSE, compress_array = FALSE;
-    int    close_conn;
-    char   buffer[80];
     struct sockaddr_in6   addr;
 
 
@@ -261,8 +261,7 @@ static int createSocket(const char p_ip[], int p_port) {
     addr.sin6_family      = AF_INET6;
     memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
     addr.sin6_port        = htons(p_port);
-    rc = bind(listen_sd,
-              (struct sockaddr *)&addr, sizeof(addr));
+    rc = bind(listen_sd, (struct sockaddr *)&addr, sizeof(addr));
     if (rc < 0)
     {
       perror("bind() failed");
@@ -371,7 +370,7 @@ static void httpRequestDispacer(struct HttpServer* This, char* p_httpRequestToPa
 /***********************************************************/
 /* Default callback                                        */
 /***********************************************************/
-struct HttpResponse  onHttpRequest(struct HttpRequest* p_request) {
+struct HttpResponse  onHttpRequest([[maybe_unused]]struct HttpRequest* p_request) {
     printf("This is default callback for http server. You have to implement you callback.\n");
     struct HttpResponse response = createSimpleHttpResponse("Please Implement onHttpRequest method", 404);
     return response;
@@ -514,9 +513,8 @@ static void* waitForNewConnectionThread(void *arg) {
 
 
 
-static void start(struct HttpServer *This, const char p_ip[], int p_port) {
-    pthread_t thid;
-    This->Private.listen_sd = createSocket(p_ip, p_port);
+static void start(struct HttpServer *This, int p_port) {
+    This->Private.listen_sd = createSocket(p_port);
 
     if (pthread_create(&This->Private.listenThread, NULL, waitForNewConnectionThread, This) != 0) {
         perror("pthread_create() error");
@@ -524,7 +522,7 @@ static void start(struct HttpServer *This, const char p_ip[], int p_port) {
     }
 
     setServerRunning(This, 1);
-    printf("Http serer is running on: %s:%d\n", p_ip, p_port);
+    printf("Http server is running on: %s:%d\n", "localhost", p_port);
 
 }
 
