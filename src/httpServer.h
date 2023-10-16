@@ -8,6 +8,7 @@
 #pragma once
 #include <stdio.h>
 #include <pthread.h>
+static pthread_mutex_t lock;
 
 struct HttpResponse{
     char* msg;
@@ -38,7 +39,7 @@ struct HttpServer {
     /*******************************************************************/
     struct HttpResponse  (*onHttpRequest)(struct HttpRequest* p_request);
     struct {
-        pthread_mutex_t lock;
+        // pthread_mutex_t lock;  we cannot keep it here. It is not copyable
         volatile int finishMe;
         volatile int serverRunning;
         int listen_sd;

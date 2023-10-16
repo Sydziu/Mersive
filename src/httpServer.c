@@ -171,35 +171,40 @@ static struct HttpRequest createHttpRequest(char *p_buff, size_t p_size) {
 
 static int isServerRunning(struct HttpServer *This) {
     volatile int serverRunning;
-    pthread_mutex_lock(&This->Private.lock);
+    // pthread_mutex_lock(&This->Private.lock);
+    pthread_mutex_lock(&lock);
     serverRunning = This->Private.serverRunning;
-    pthread_mutex_unlock(&This->Private.lock);
+    pthread_mutex_unlock(&lock);
+    //pthread_mutex_unlock(&This->Private.lock);
     return serverRunning;
 };
 
 static void setServerRunning(struct HttpServer *This, int p_value) {
-    pthread_mutex_lock(&This->Private.lock);
+    pthread_mutex_lock(&lock);
+    //pthread_mutex_lock(&This->Private.lock);
     This->Private.serverRunning = p_value;
-    pthread_mutex_unlock(&This->Private.lock);
+    pthread_mutex_unlock(&lock);
+    //pthread_mutex_unlock(&This->Private.lock);
 };
 
 static int isServerGonigToEnd(struct HttpServer *This) {
     volatile int finishMe;
-    pthread_mutex_lock(&This->Private.lock);
+    //pthread_mutex_lock(&This->Private.lock);
+    pthread_mutex_lock(&lock);
     finishMe = This->Private.finishMe;
-    pthread_mutex_unlock(&This->Private.lock);
+    pthread_mutex_unlock(&lock);
+    //pthread_mutex_unlock(&This->Private.lock);
     return finishMe;
 };
 
 static void  setServerEnd(struct HttpServer *This) {
-    pthread_mutex_lock(&This->Private.lock);
+    // pthread_mutex_lock(&This->Private.lock);
+    pthread_mutex_lock(&lock);
     This->Private.finishMe = 1;
-    pthread_mutex_unlock(&This->Private.lock);
+    //pthread_mutex_unlock(&This->Private.lock);
+    pthread_mutex_unlock(&lock);
 };
 
-
-
-#define SERVER_PORT  8000
 
 #define TRUE             1
 #define FALSE            0
@@ -255,7 +260,7 @@ static int createSocket(const char p_ip[], int p_port) {
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family      = AF_INET6;
     memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-    addr.sin6_port        = htons(SERVER_PORT);
+    addr.sin6_port        = htons(p_port);
     rc = bind(listen_sd,
               (struct sockaddr *)&addr, sizeof(addr));
     if (rc < 0)
@@ -323,7 +328,7 @@ void sendHttpResponse(struct HttpResponse* This, int p_socket) {
     /* Assume that there is no NULL character inside             */
     /*************************************************************/
     if (This->content != NULL) {
-        strncat(buff, This->content , MAX_TCP_PACKAGE_SIZE);
+        strncat(buff, This->content , MAX_TCP_PACKAGE_SIZE-1);
     }
 
     send(p_socket, buff, strlen(buff), 0);
@@ -364,7 +369,6 @@ struct HttpResponse  onHttpRequest(struct HttpRequest* p_request) {
 static void newConnectionHasCome(struct HttpServer* This, int new_sd) {
     int rc;
     int timeout_ms = 1000;
-    printf("new Connection!!!\n");
     const int    nfds = 1;
     struct pollfd fds[nfds];
 
@@ -397,8 +401,9 @@ static void newConnectionHasCome(struct HttpServer* This, int new_sd) {
     /***********************************************************/
     /* Receive data on This connection                         */
     /***********************************************************/
-    char   buffer[MAX_TCP_PACKAGE_SIZE];
-    rc = recv(new_sd, buffer, sizeof(buffer), 0);
+    char   buffer[MAX_TCP_PACKAGE_SIZE] = {0};
+    rc = recv(new_sd, buffer, sizeof(buffer)-1, 0);  // -1 to have last byte zero. Because buffer is all zeros initialized.
+                                                     // This ensure us that string parsing will not got into trouble
     if (rc < 0) {
         perror("  recv() failed");
         return;
@@ -451,7 +456,6 @@ static void* waitForNewConnectionThread(void *arg) {
     /* timeout value is based on milliseconds.                   */
     /*************************************************************/
     timeout_ms = 500;
-    printf("Waiting on clients...\n");
     while (isServerGonigToEnd(This) == 0) {
         rc = poll(fds, nfds, timeout_ms);
 
@@ -473,9 +477,7 @@ static void* waitForNewConnectionThread(void *arg) {
         /* Accept each incoming connection.                  */
         /*****************************************************/
         if (rc > 0) {
-            printf("Got client!!!\n"); fflush(stdout);
             new_sd = accept(This->Private.listen_sd, NULL, NULL);
-            printf("  accepted!!!\n"); fflush(stdout);
             if (new_sd < 0) {
                 perror("  accept() failed"); fflush(stdout);
                 continue;
@@ -511,6 +513,7 @@ static void start(struct HttpServer *This, const char p_ip[], int p_port) {
     }
 
     setServerRunning(This, 1);
+    printf("Http serer is running on: %s:%d\n", p_ip, p_port);
 
 }
 

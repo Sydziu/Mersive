@@ -29,6 +29,7 @@ TEST(httpRequestParser, POST) {
     EXPECT_EQ(std::string(request.content), "{ \"secret\": 42 }");
     EXPECT_EQ(request.contentLength, 16);
     destroyHttpRequest(&request);
+    free(buff);
 }
 
 TEST(httpRequestParser, POSTWrongEnd) {
@@ -42,6 +43,7 @@ TEST(httpRequestParser, POSTWrongEnd) {
     static struct HttpRequest request = createHttpRequest(buff, strlen(buff));
     EXPECT_EQ(request.method, REQ_UNKNOWN);
     destroyHttpRequest(&request);
+    free(buff);
 }
 
 
@@ -60,6 +62,7 @@ TEST(httpRequestParser, POSTZeroContent) {
     EXPECT_EQ(std::string(request.content), "");
     EXPECT_EQ(request.contentLength, 0);
     destroyHttpRequest(&request);
+    free(buff);
 }
 
 TEST(httpRequestParser, POSTContantSizeToSmall) {
@@ -73,6 +76,7 @@ TEST(httpRequestParser, POSTContantSizeToSmall) {
     static struct HttpRequest request = createHttpRequest(buff, strlen(buff));
     EXPECT_EQ(request.method, REQ_UNKNOWN);
     destroyHttpRequest(&request);
+    free(buff);
 }
 
 TEST(httpRequestParser, POSTContantSizeToBig) {
@@ -86,6 +90,7 @@ TEST(httpRequestParser, POSTContantSizeToBig) {
     static struct HttpRequest request = createHttpRequest(buff, strlen(buff));
     EXPECT_EQ(request.method, REQ_UNKNOWN);
     destroyHttpRequest(&request);
+    free(buff);
 }
 
 
@@ -103,6 +108,7 @@ TEST(httpRequestParser, POSTContentLengthNotNum) {
     EXPECT_EQ(std::string(request.contentType), "application/json");
     EXPECT_EQ(request.contentLength, 0);
     destroyHttpRequest(&request);
+    free(buff);
 }
 
 TEST(httpRequestParser, POSTmoreSpacesAroundValues) {
@@ -121,4 +127,5 @@ TEST(httpRequestParser, POSTmoreSpacesAroundValues) {
     EXPECT_EQ(std::string(request.contentType), "application/json ");
     EXPECT_EQ(request.contentLength, 16);
     destroyHttpRequest(&request);
+    free(buff);
 }

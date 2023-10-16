@@ -27,9 +27,12 @@ struct KeyStorage {
     int (*addKey)(struct KeyStorage *This, struct SingleRecord *p_record);
     struct SingleRecord* (*getKey)(struct KeyStorage *This, const char* key);
     int (*removeKey)(struct KeyStorage *This, const char* key);
+    int (*getSize)(struct KeyStorage *This);
+    void (*dumpKeys)(struct KeyStorage *This);
     struct {
         struct SingleRecord keys[MAX_KEYS];
-        pthread_mutex_t lock;
+        volatile int size;
+        //pthread_mutex_t lock; // we cannot keep it here. It is not copyable
     } Private;
 };
 
