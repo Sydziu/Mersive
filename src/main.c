@@ -46,7 +46,14 @@ static struct HttpResponse onHttpRequest(struct HttpRequest* p_request) {
     	return response;
     }
     if (p_request->method == REQ_DELETE) {
-        printf("DELETE method\n");
+    	int rc = keyStg.removeKey(&keyStg, p_request->url);
+    	if (rc !=0) {
+    		// Unable to remove key. Does not exist ?
+    	    struct HttpResponse response = createSimpleHttpResponse("Not Found", 404);
+    	    return response;
+    	}
+    	struct HttpResponse response = createSimpleHttpResponse("OK", 202);
+    	return response;
     }
     if (p_request->method == REQ_GET) {
         printf("GET method\n");
