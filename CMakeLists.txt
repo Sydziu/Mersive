@@ -77,6 +77,18 @@ else()
 endif()
 
 #*******************************************************************************
+#                               Product test
+#*******************************************************************************
+find_program (BASH_PROGRAM bash)
+if (BASH_PROGRAM)
+  add_test(
+     NAME productTest 
+     COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/productTest/testScript.sh
+     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/productTest/
+    )
+endif (BASH_PROGRAM)
+
+#*******************************************************************************
 #                   Code wich dump all the CMAKE's variables
 #*******************************************************************************
 #get_cmake_property(_variableNames VARIABLES)
