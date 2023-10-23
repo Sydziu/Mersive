@@ -34,7 +34,7 @@ cmake make install
 # Installation
 The make target "install" will install the binary at ./build/dist/bin/httpServer.
 
-More over this install Gtests at /build/dist/test/ directory.
+More over, this install the Gtests at /build/dist/test/ directory.
 
 # Testing
 There are two types of tests. The Gtest and product test. Both of them are executed by 'make test' command
